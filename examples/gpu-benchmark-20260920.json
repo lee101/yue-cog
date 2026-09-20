@@ -1,0 +1,164 @@
+{
+  "results": [
+    {
+      "audio_url": "https://netwrckstatic.netwrck.com/static/uploads/music/yue2/renders/8ed6aea33fdd4911b0d42f66c54fb5b1.flac",
+      "bytes": 12297505,
+      "content_type": "audio/flac",
+      "device": "cuda:0",
+      "format": "flac",
+      "peak_allocated_mib": 7420,
+      "quantization": "none",
+      "runtime": "yue2-bd90e4c-quality-v2",
+      "runtime_backend": "torch",
+      "sample_rate": 48000,
+      "seconds": 64.47866666666667,
+      "semantic_tokens": 1612,
+      "timing": {
+        "abc": {
+          "attention": "flash",
+          "cfg_branches": 1,
+          "content_tokens": 701,
+          "execution": "cuda_graph",
+          "output_tokens": 702,
+          "output_tps": 120.03320701134724,
+          "prefill_seconds": 0.6414482300169766,
+          "prefix_tokens": 109,
+          "seconds": 5.848381606047042,
+          "ttft_seconds": 0.8354471400380135
+        },
+        "e2e_seconds": 29.57993508700747,
+        "load": {
+          "mot_load_seconds": 0.2687602499499917,
+          "resolve_and_integrity_seconds": 33.939404889941216
+        },
+        "nar_seconds": 3.5474346060073003,
+        "semantic": {
+          "attention": "flash",
+          "cfg_branches": 1,
+          "content_tokens": 1612,
+          "execution": "cuda_graph",
+          "output_tokens": 1613,
+          "output_tps": 137.69785714278981,
+          "prefill_seconds": 0.12144234497100115,
+          "prefix_tokens": 812,
+          "seconds": 11.714053025003523,
+          "ttft_seconds": 0.12263027403969318
+        },
+        "vae_seconds": 5.22875780495815
+      },
+      "truncated": {
+        "abc": false,
+        "semantic": false
+      },
+      "wall_s": 63.987,
+      "execution_ms": 66912,
+      "delay_ms": 178195,
+      "request_wall_s": 249.821,
+      "job_id": "39e60ae9-279f-414c-be2e-6806eb3aaf57-u1",
+      "worker_id": "llu7vwcop3u7vj",
+      "request": {
+        "style": "English, upbeat synth-pop, bright male voice, punchy synth bass, neon pads, driving beat, 116 BPM",
+        "lyrics": "[Verse]\nCity lights are calling out my name\nMidnight streets all look the same\nI keep running toward the glow\nChasing highs I'll never know\n[Chorus]\nWe are electric, we are gold\nStories that will never get old",
+        "seed": 831002,
+        "cot": "full",
+        "ode_steps": 32,
+        "semantic_max_tokens": 3000,
+        "format": "flac"
+      }
+    },
+    {
+      "audio_url": "https://netwrckstatic.netwrck.com/static/uploads/music/yue2/renders/1159ffe7a0a740d6a34d831eadf924df.flac",
+      "bytes": 12297505,
+      "content_type": "audio/flac",
+      "device": "cuda:0",
+      "format": "flac",
+      "peak_allocated_mib": 7695.4,
+      "quantization": "none",
+      "runtime": "yue2-bd90e4c-quality-v2",
+      "runtime_backend": "torch",
+      "sample_rate": 48000,
+      "seconds": 64.47866666666667,
+      "semantic_tokens": 1612,
+      "timing": {
+        "abc": {
+          "attention": "flash",
+          "cfg_branches": 1,
+          "content_tokens": 701,
+          "execution": "cuda_graph",
+          "output_tokens": 702,
+          "output_tps": 137.60328138997437,
+          "prefill_seconds": 0.12356343108695,
+          "prefix_tokens": 109,
+          "seconds": 5.10162252606824,
+          "ttft_seconds": 0.12477828003466129
+        },
+        "e2e_seconds": 24.72814814397134,
+        "load": {
+          "mot_load_seconds": 0.2687602499499917,
+          "resolve_and_integrity_seconds": 33.939404889941216
+        },
+        "nar_seconds": 3.501350307953544,
+        "semantic": {
+          "attention": "flash",
+          "cfg_branches": 1,
+          "content_tokens": 1612,
+          "execution": "cuda_graph",
+          "output_tokens": 1613,
+          "output_tps": 137.5343811291871,
+          "prefill_seconds": 0.10990202589891851,
+          "prefix_tokens": 812,
+          "seconds": 11.727976573980413,
+          "ttft_seconds": 0.11072733195032924
+        },
+        "vae_seconds": 3.4431314640678465
+      },
+      "truncated": {
+        "abc": false,
+        "semantic": false
+      },
+      "wall_s": 24.889,
+      "execution_ms": 25780,
+      "delay_ms": 16,
+      "request_wall_s": 32.231,
+      "job_id": "f674779a-d2e0-459c-886c-4865a2232129-u2",
+      "worker_id": "llu7vwcop3u7vj",
+      "request": {
+        "style": "English, upbeat synth-pop, bright male voice, punchy synth bass, neon pads, driving beat, 116 BPM",
+        "lyrics": "[Verse]\nCity lights are calling out my name\nMidnight streets all look the same\nI keep running toward the glow\nChasing highs I'll never know\n[Chorus]\nWe are electric, we are gold\nStories that will never get old",
+        "seed": 831002,
+        "cot": "full",
+        "ode_steps": 32,
+        "semantic_max_tokens": 3000,
+        "format": "flac"
+      }
+    }
+  ],
+  "quality": [
+    {
+      "run": 1,
+      "sha256": "509a973ddb812b59cbcc5fae73219a6fd28012a6126d65ef770a143073f9d83c",
+      "frames": 3094976,
+      "sample_rate": 48000,
+      "channels": 2,
+      "finite": true,
+      "peak": 0.986762523651123,
+      "clipped_fraction": 0.0,
+      "execution_cost_usd_4090": 0.020445333333333336,
+      "realtime_factor": 0.9923747389317397
+    },
+    {
+      "run": 2,
+      "sha256": "509a973ddb812b59cbcc5fae73219a6fd28012a6126d65ef770a143073f9d83c",
+      "frames": 3094976,
+      "sample_rate": 48000,
+      "channels": 2,
+      "finite": true,
+      "peak": 0.986762523651123,
+      "clipped_fraction": 0.0,
+      "execution_cost_usd_4090": 0.007877222222222223,
+      "realtime_factor": 0.3860036394466387
+    }
+  ],
+  "same_worker": true,
+  "note": "Inference time and exact result cache gains are separate; no result cache used in these two renders."
+}

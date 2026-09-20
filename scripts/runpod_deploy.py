@@ -5,7 +5,7 @@ Usage:
   RUNPOD_API_KEY=... scripts/runpod_deploy.py --image ghcr.io/lee101/yue-cog:sls
       --name yue2 [--endpoint-id existing]
 
-Fast/cheap defaults: 10s scaledown, max 1 worker, 4090-class GPUs.
+Defaults: 10s scaledown, zero workers until explicitly enabled, RTX 4090.
 """
 
 import argparse
@@ -13,41 +13,44 @@ import json
 import os
 import urllib.request
 
-GRAPHQL = "https://api.runpod.io/graphql"
+REST = "https://rest.runpod.io/v1"
 
 
-def gql(api_key, query, variables):
-    body = json.dumps({"query": query, "variables": variables}).encode()
-    req = urllib.request.Request(GRAPHQL, data=body, method="POST",
-                                 headers={"Content-Type": "application/json",
-                                          "Authorization": f"Bearer {api_key}"})
-    with urllib.request.urlopen(req, timeout=60) as resp:
-        payload = json.loads(resp.read().decode())
-    if payload.get("errors"):
-        raise RuntimeError(payload["errors"])
-    return payload["data"]
+def api(api_key: str, method: str, path: str, payload: dict) -> dict:
+    req = urllib.request.Request(REST + path, data=json.dumps(payload).encode(), method=method,
+        headers={"Content-Type": "application/json", "Authorization": "Bearer " + api_key,
+                 "User-Agent": "Omniserve-YuE/1"})
+    with urllib.request.urlopen(req, timeout=60) as response:
+        return json.load(response)
 
 
 def save_template(api_key, name, image, env, disk_gb, registry_auth_id):
-    inp = {"name": f"{name}-tpl", "imageName": image, "dockerArgs": "python -u /src/rp_handler.py",
-           "containerDiskInGb": disk_gb, "volumeInGb": 40, "volumeMountPath": "/runpod-volume",
-           "env": [{"key": k, "value": v} for k, v in env.items()]}
+    payload = {"name": name + "-tpl", "imageName": image, "isServerless": True,
+        "containerDiskInGb": disk_gb, "volumeInGb": 0,
+        "dockerEntrypoint": ["python", "-u", "/src/rp_handler.py"],
+        "dockerStartCmd": [], "env": env}
     if registry_auth_id:
-        inp["registryAuthId"] = registry_auth_id
-    data = gql(api_key, "mutation saveTemplate($input: SaveTemplateInput!) { saveTemplate(input: $input) { id } }",
-               {"input": inp})
-    return data["saveTemplate"]["id"]
+        payload["containerRegistryAuthId"] = registry_auth_id
+    return api(api_key, "POST", "/templates", payload)["id"]
 
 
 def save_endpoint(api_key, name, template_id, gpu_ids, workers_max, idle, endpoint_id=None):
-    inp = {"name": name, "templateId": template_id, "gpuIds": gpu_ids,
-           "workersMax": workers_max, "workersMin": 0, "idleTimeout": idle,
-           "executionTimeoutMs": 1800000, "flashboot": True}
-    if endpoint_id:
-        inp["id"] = endpoint_id
-    data = gql(api_key, "mutation saveEndpoint($input: EndpointInput!) { saveEndpoint(input: $input) { id } }",
-               {"input": inp})
-    return data["saveEndpoint"]["id"]
+    if workers_max not in (0, 1):
+        raise ValueError("YuE deployment supports a maximum of one worker")
+    gpu_names = {"ADA_24": "NVIDIA GeForce RTX 4090", "AMPERE_24": "NVIDIA GeForce RTX 3090"}
+    payload = {"name": name, "templateId": template_id, "computeType": "GPU", "gpuCount": 1,
+        "allowedCudaVersions": ["12.8", "12.9", "13.0"],
+        "gpuTypeIds": [gpu_names.get(gpu.strip(), gpu.strip()) for gpu in gpu_ids.split(",")],
+        "workersMax": workers_max or 1, "workersMin": 0, "idleTimeout": idle,
+        "executionTimeoutMs": 480000, "flashboot": True, "scalerType": "QUEUE_DELAY", "scalerValue": 4}
+    path = "/endpoints" + ("/" + endpoint_id if endpoint_id else "")
+    result = api(api_key, "PATCH" if endpoint_id else "POST", path, payload)
+    identity = result["id"]
+    result = api(api_key, "PATCH", "/endpoints/" + identity,
+                 {"workersMin": 0, "workersMax": workers_max})
+    if result.get("workersMin") != 0 or result.get("workersMax") != workers_max:
+        raise RuntimeError("worker limit verification failed for endpoint " + identity)
+    return identity
 
 
 def main():
@@ -55,8 +58,8 @@ def main():
     ap.add_argument("--image", required=True)
     ap.add_argument("--name", default="yue2")
     ap.add_argument("--endpoint-id", default="")
-    ap.add_argument("--gpu-ids", default="ADA_24,AMPERE_24")
-    ap.add_argument("--workers-max", type=int, default=1)
+    ap.add_argument("--gpu-ids", default="ADA_24")
+    ap.add_argument("--workers-max", type=int, default=0)
     ap.add_argument("--idle", type=int, default=10)
     ap.add_argument("--disk-gb", type=int, default=40)
     ap.add_argument("--registry-auth-id", default="")
@@ -66,7 +69,7 @@ def main():
     if not api_key:
         raise SystemExit("RUNPOD_API_KEY is required")
     env = dict(kv.split("=", 1) for kv in args.env)
-    env.setdefault("YUE_HF_HOME", "/runpod-volume/hf")
+    env.setdefault("YUE_HF_HOME", "/tmp/yue-hf")
     env.setdefault("HF_TOKEN", os.environ.get("HF_TOKEN", ""))
     template_id = save_template(api_key, args.name, args.image, env, args.disk_gb,
                                 args.registry_auth_id or None)

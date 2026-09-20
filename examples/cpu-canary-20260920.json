@@ -1,0 +1,55 @@
+{
+  "format": "flac",
+  "content_type": "audio/flac",
+  "bytes": 1538396,
+  "seconds": 7.998666666666667,
+  "sample_rate": 48000,
+  "truncated": {
+    "abc": false,
+    "semantic": true
+  },
+  "wall_s": 910.606,
+  "timing": {
+    "abc": {
+      "seconds": 119.44766336400062,
+      "prefill_seconds": 2.6265635304152966,
+      "ttft_seconds": 2.6427898313850164,
+      "output_tokens": 693,
+      "content_tokens": 692,
+      "output_tps": 5.801704114446978,
+      "prefix_tokens": 63,
+      "cfg_branches": 1,
+      "execution": "eager",
+      "attention": "sdpa"
+    },
+    "semantic": {
+      "seconds": 84.29250861145556,
+      "prefill_seconds": 26.788134693168104,
+      "ttft_seconds": 26.802692595869303,
+      "output_tokens": 200,
+      "content_tokens": 200,
+      "output_tps": 2.372690091854966,
+      "prefix_tokens": 757,
+      "cfg_branches": 1,
+      "execution": "eager",
+      "attention": "sdpa"
+    },
+    "nar_seconds": 577.680035058409,
+    "vae_seconds": 8.362129702232778,
+    "load": {
+      "resolve_and_integrity_seconds": 116.15823156293482,
+      "mot_load_seconds": 0.8274134127423167
+    },
+    "e2e_seconds": 794.3911880487576
+  },
+  "runtime": "yue2-bd90e4c-quality-v1",
+  "request": {
+    "style": "English, warm acoustic folk, gentle male voice, fingerpicked guitar, 76 BPM",
+    "lyrics": "[Verse]\nMorning light is coming through\nEvery road begins with you",
+    "cot": "full",
+    "seed": 831010,
+    "ode_steps": 32,
+    "semantic_max_tokens": 200,
+    "format": "flac"
+  }
+}

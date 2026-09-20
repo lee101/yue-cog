@@ -12,6 +12,10 @@ import os
 import sys
 import time
 import urllib.request
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from audio_transport import prepare_output_upload
 
 BASE = "https://api.runpod.ai/v2"
 
@@ -20,6 +24,7 @@ def call(api_key, method, url, body=None, retries=8):
     req = urllib.request.Request(url, method=method, data=json.dumps(body).encode() if body is not None else None,
                                  headers={"Content-Type": "application/json", "Authorization": "Bearer " + api_key,
                                           "User-Agent": "yue-cog/0.1"})
+    retries = retries if method == "GET" else 1
     for attempt in range(retries):
         try:
             with urllib.request.urlopen(req, timeout=120) as resp:
@@ -48,13 +53,15 @@ def main():
         sys.exit("RUNPOD_API_KEY is required")
     payload = {"input": {"style": args.style, "lyrics": args.lyrics, "cot": args.cot,
                          "seed": args.seed, "ode_steps": args.ode_steps,
-                         "semantic_max_tokens": args.semantic_max_tokens, "format": args.format},
-               "policy": {"executionTimeout": 1800000}}
+                         "semantic_max_tokens": args.semantic_max_tokens, "format": args.format,
+                         "output_upload": prepare_output_upload(args.format)},
+               "policy": {"executionTimeout": 480000, "ttl": 1800000}}
     t0 = time.time()
     job = call(api_key, "POST", f"{BASE}/{args.endpoint}/run", payload)
     job_id = job["id"]
     print("job", job_id, job.get("status"), flush=True)
-    while True:
+    deadline = time.monotonic() + 1800
+    while time.monotonic() < deadline:
         time.sleep(5)
         st = call(api_key, "GET", f"{BASE}/{args.endpoint}/status/{job_id}")
         if st.get("status") in ("COMPLETED", "FAILED", "CANCELLED", "TIMED_OUT"):
@@ -64,10 +71,18 @@ def main():
                 open(args.out, "wb").write(raw)
                 print(f"wrote {args.out} ({len(raw)} bytes)")
                 out = {k: (f"<{len(v)} chars>" if k == "audio_b64" else v) for k, v in out.items()}
+            elif out.get("audio_url"):
+                request = urllib.request.Request(out["audio_url"], headers={"User-Agent": "Omniserve-YuE/1"})
+                with urllib.request.urlopen(request, timeout=120) as response:
+                    Path(args.out).write_bytes(response.read())
+                print(f"wrote {args.out}")
             print(json.dumps({"status": st.get("status"), "error": st.get("error"),
                               "executionTime_ms": st.get("executionTime"),
                               "wall_s": round(time.time() - t0, 1), "output": out}, indent=1))
-            sys.exit(0 if st.get("status") == "COMPLETED" else 1)
+            sys.exit(0 if st.get("status") == "COMPLETED" and (out.get("audio_b64") or out.get("audio_url")) else 1)
+
+    call(api_key, "POST", f"{BASE}/{args.endpoint}/cancel/{job_id}", {})
+    sys.exit("YuE job timed out and was cancelled")
 
 
 if __name__ == "__main__":

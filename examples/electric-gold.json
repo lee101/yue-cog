@@ -1,0 +1,29 @@
+{
+  "clip": "synthpop",
+  "seed": 831002,
+  "ode_steps": 32,
+  "max_tokens": 3000,
+  "sem_tokens": 1522,
+  "seconds": 60.9,
+  "truncated": {
+    "abc": false,
+    "semantic": false
+  },
+  "gen_s": 3533.3,
+  "timing": {
+    "nar_seconds": 3131.3,
+    "vae_seconds": 33.7,
+    "e2e_seconds": 3533.0
+  },
+  "title": "Electric Gold",
+  "style": "English, upbeat synth-pop, bright male voice, punchy synth bass, neon pads, driving beat, 116 BPM",
+  "lyrics": "[Verse]\nCity lights are calling out my name\nMidnight streets all look the same\nI keep running toward the glow\nChasing highs I'll never know\n[Chorus]\nWe are electric, we are gold\nStories that will never get old",
+  "model": "m-a-p/YuE2-3B",
+  "vae": "m-a-p/YuE2-Vae",
+  "cot": "full",
+  "device": "cpu",
+  "quantization": "none",
+  "source": "samples/synthpop.flac",
+  "mp3_url": "https://netwrckstatic.netwrck.com/static/uploads/music/yue2/examples/electric-gold-985a5e845126.mp3",
+  "flac_url": "https://netwrckstatic.netwrck.com/static/uploads/music/yue2/examples/electric-gold-7110954b6f32.flac"
+}

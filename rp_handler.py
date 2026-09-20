@@ -1,15 +1,14 @@
-"""RunPod serverless handler. Calls the cog Predictor in-process (no HTTP hop)."""
+"""RunPod serverless handler. Keeps the shared YuE2 runtime warm between jobs."""
 
 import os
-import socket
 import sys
 import threading
-import time
 
 import runpod
-from predict import _handler_predictor
+from yue_runtime import Runtime, normalize_request
+from audio_transport import deliver_audio
 
-LOG_PATH = "/tmp/yue2-worker.log"
+runtime = Runtime()
 
 
 def _recover_gpu(message):
@@ -30,27 +29,11 @@ def _recover_gpu(message):
 
 def handler(job):
     payload = job.get("input") or {}
-    if not payload.get("style") or not payload.get("lyrics"):
+    if not isinstance(payload, dict) or not payload.get("style") or not payload.get("lyrics"):
         return {"error": "style and lyrics are required"}
-    t0 = time.time()
     try:
-        pred = _handler_predictor()
-        out = pred.predict(
-            style=payload["style"], lyrics=payload["lyrics"],
-            cot=payload.get("cot", "full"), seed=int(payload.get("seed", 831001)),
-            abc=payload.get("abc", ""), cfg_scale=float(payload.get("cfg_scale", 0)),
-            ode_steps=int(payload.get("ode_steps", 32)),
-            semantic_max_tokens=int(payload.get("semantic_max_tokens", 9000)),
-            format=payload.get("format", "mp3"))
-        import base64
-        raw = open(str(out), "rb").read()
-        fmt = str(out).rsplit(".", 1)[-1]
-        try:
-            os.unlink(str(out))
-        except OSError:
-            pass
-        return {"audio_b64": base64.b64encode(raw).decode(), "format": fmt,
-                "bytes": len(raw), "wall_s": round(time.time() - t0, 1)}
+        result = runtime.generate(normalize_request(payload))
+        return deliver_audio(result, payload.get("output_upload"))
     except Exception as exc:  # noqa: BLE001
         _recover_gpu(str(exc))
         return {"error": f"{type(exc).__name__}: {exc}"}
