@@ -1,0 +1,64 @@
+{
+  "outputKind": "audio",
+  "inputs": [
+    {
+      "name": "style",
+      "type": "string",
+      "description": "Genre, instruments, vocal character, language, tempo",
+      "required": true,
+      "order": 0
+    },
+    {
+      "name": "lyrics",
+      "type": "string",
+      "description": "Lyrics with [Verse]/[Chorus] section tags",
+      "required": true,
+      "order": 1
+    },
+    {
+      "name": "cot",
+      "type": "string",
+      "description": "Symbolic planning: full chords+melody, melody only, or off",
+      "default": "full",
+      "choices": ["full", "melody", "off"],
+      "order": 2
+    },
+    {
+      "name": "seed",
+      "type": "integer",
+      "description": "Random seed",
+      "default": 831001,
+      "order": 3
+    },
+    {
+      "name": "abc",
+      "type": "string",
+      "description": "Optional own ABC score (requires full/melody)",
+      "order": 4
+    },
+    {
+      "name": "ode_steps",
+      "type": "integer",
+      "description": "Flow-matching steps; 32 quality default, 16 fast",
+      "default": 32,
+      "choices": ["16", "24", "32", "48"],
+      "order": 5
+    },
+    {
+      "name": "semantic_max_tokens",
+      "type": "integer",
+      "description": "Cap song length for cheap tests; 9000 full song",
+      "default": 9000,
+      "choices": ["1500", "3000", "6000", "9000"],
+      "order": 6
+    },
+    {
+      "name": "format",
+      "type": "string",
+      "description": "Delivery audio format",
+      "default": "mp3",
+      "choices": ["mp3", "wav", "flac"],
+      "order": 7
+    }
+  ]
+}

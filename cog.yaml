@@ -1,0 +1,27 @@
+image: "ghcr.io/lee101/yue-cog"
+build:
+  gpu: true
+  cuda: "12.8"
+  python_version: "3.12"
+  python_packages:
+    - "torch==2.10.0"
+    - "transformers==4.57.6"
+    - "huggingface_hub==0.36.2"
+    - "safetensors==0.7.0"
+    - "tiktoken==0.12.0"
+    - "numpy==2.2.6"
+    - "soundfile==0.13.1"
+    - "accelerate==1.13.0"
+    - "imageio-ffmpeg==0.6.0"
+    - "cog==0.21.0"
+    - "runpod==1.7.9"
+  system_packages:
+    - "git"
+    - "build-essential"
+    - "libsndfile1"
+    - "ffmpeg"
+  run:
+    - pip install --no-cache-dir "git+https://github.com/multimodal-art-projection/YuE.git@bd90e4ccae671d869b3ecaca6d7e893927d29442"
+    # Weights (~7GB) are fetched at runtime into the HF cache (or
+    # /runpod-volume/hf on serverless) so GHCR layers stay small.
+predict: "predict.py:Predictor"

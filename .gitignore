@@ -1,0 +1,9 @@
+.venv/
+__pycache__/
+*.pyc
+/tmp/
+samples/
+*.flac
+*.wav
+*.mp3
+tools/c-bench/postprocess
