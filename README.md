@@ -50,7 +50,7 @@ Weights (~7GB) fetch at runtime into `HF_HOME` (`/runpod-volume/hf` on serverles
 
 ## License
 
-Adapter code MIT. YuE2 model weights: CC BY-NC 4.0 + creator permission — commercial use needs a license from the YuE authors; generated audio is free to monetize for personal/creator use.
+Adapter code MIT. YuE2 model weights: CC BY-NC 4.0; we hold a commercial license from the YuE authors for production use. Publicly the service is the "Manifold Music Generator".
 
 ## Native serving and NetWRCK
 
@@ -71,9 +71,7 @@ for a test, then reset it to zero. The inference image defaults to a 24 GiB
 budget on a dedicated worker; the shared-host service uses 18 GiB.
 
 Native configuration and cost/quality details are in
-`../omniserve-native/performance/yue2-music.md`. The NetWRCK studio is
-`/tools/yue-music`; generation remains disabled until commercial permission
-and service configuration are present. `examples/electric-gold.json` contains
+`../omniserve-native/performance/yue2-music.md`. Production: ManifoldGen's Manifold Music Generator (server/music_yue.go) submits to RunPod endpoint omniserve-yue2-quality; nothing gates generation. `examples/electric-gold.json` contains
 the original prompt and public bucket URLs for the default quality sample.
 
 Install `requirements-serving.txt` in the caller/worker virtualenv to sign R2
