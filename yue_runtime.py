@@ -55,9 +55,11 @@ class Runtime:
     def __init__(self) -> None:
         self.pipe = None
         self.lock = threading.Lock()
+        self.accel = {}
 
     def load(self) -> None:
         import torch
+        import yue2
         from yue2 import YuE2Pipeline
         from yue2.protocol import GenerationConfig
         from huggingface_hub.errors import LocalEntryNotFoundError
@@ -80,6 +82,16 @@ class Runtime:
             memory_budget_gib=float(os.getenv("YUE_MEMORY_BUDGET_GIB", "18")),
             offload_ar=os.getenv("YUE_OFFLOAD_AR", "1") == "1",
             generation_config=GenerationConfig(ode_steps=32), progress=False)
+        self.accel = {}
+        if getattr(yue2, "ACCEL_PATCH", 0):
+            self.accel = dict(resident=os.getenv("YUE_RESIDENT", "0") == "1" and device == "cuda",
+                              pin_weights=os.getenv("YUE_PIN_WEIGHTS", "0") == "1" and device == "cuda",
+                              fast_placement=os.getenv("YUE_FAST_PLACEMENT", "1") == "1",
+                              fused_sampling=os.getenv("YUE_FUSED_SAMPLING", "1") == "1",
+                              lean_decode=os.getenv("YUE_LEAN_DECODE", "1") == "1")
+            options.update(self.accel)
+        elif os.getenv("YUE_RESIDENT", "0") == "1":
+            raise RuntimeError("YUE_RESIDENT=1 needs scripts/apply_yue2_patch.py applied to the yue2 package")
         model = os.getenv("YUE_MODEL", "m-a-p/YuE2-3B")
         pinned = all(len(options[key]) == 40 and all(c in "0123456789abcdef" for c in options[key])
                      for key in ("revision", "vae_revision"))
@@ -139,4 +151,5 @@ class Runtime:
                     "peak_allocated_mib": round(torch.cuda.max_memory_allocated() / 2**20, 1)
                         if self.pipe.device.type == "cuda" else 0,
                     "wall_s": round(time.monotonic() - started, 3),
+                    "accel": self.accel,
                     "timing": song.timing, "runtime": RUNTIME_VERSION}

@@ -21,6 +21,7 @@ Upstream forces **bfloat16** and disables TF32 for quality; fp16 is deliberately
 
 ```
 python3 -m venv .venv && .venv/bin/pip install "git+https://github.com/multimodal-art-projection/YuE.git@bd90e4ccae671d869b3ecaca6d7e893927d29442"
+.venv/bin/python scripts/apply_yue2_patch.py          # exact accel patch, see below
 .venv/bin/python scripts/local_gen.py --fast --out /tmp/yue2-test.flac
 ```
 
@@ -38,6 +39,32 @@ length) > `ode_steps` 32→16 (fewer NAR evaluations, requires quality compariso
 VRAM but is experimental with no quality claim; `YUE_BACKEND=vllm`
 needs vllm installed and serves one request at a time. `YUE_OFFLOAD_AR=1`
 (default) cuts NAR peak VRAM at small time cost.
+
+## Accel patch (exact)
+
+`patches/yue2-accel.patch` modifies the pinned upstream package; `scripts/apply_yue2_patch.py`
+applies it to the interpreter's `yue2` (idempotent, refuses anything but the pinned pristine
+files, `--check`, `--revert`). The Dockerfile applies it at build. `cog.yaml` builds stay
+unpatched and `yue_runtime.py` then runs the upstream paths. Every change produces the same
+tokens, latents and FLAC bytes as upstream, so `RUNTIME_VERSION` and result caches are unchanged.
+
+| Env (default) | Effect |
+| --- | --- |
+| `YUE_FAST_PLACEMENT` (1) | Weights keep an immutable CPU master (the loaded mmap): offload is free, AR is not re-uploaded after NAR only to be offloaded for the VAE. One upload per request instead of two uploads and two downloads. Same peak VRAM. |
+| `YUE_FUSED_SAMPLING` (1) | Single-branch requests run logits processing, the multinomial draw and history update inside the decode CUDA graph; one host sync per token instead of several round-trips. Verified bitwise against the eager sampler once per process, else falls back. CFG/`cot=off` keep eager sampling. |
+| `YUE_LEAN_DECODE` (1) | Q/K heads share one RMSNorm+RoPE pass per layer (fewer tiny kernels). Verified bitwise (logits and KV) once per process, else falls back. |
+| `YUE_RESIDENT` (0, image 1) | LM and VAE decoder stay on the GPU; no per-request moves. Peak allocation 9.6 GiB instead of 7.6 GiB (LM plus VAE tile), idle process VRAM 8.4 GiB instead of 1.5 GiB. Needs the patch. |
+| `YUE_PIN_WEIGHTS` (0) | Pinned masters: upload 0.5 s instead of 1.9 s, for about 8 s once per process and about 9 GiB locked host RAM. Only worth it for long-lived non-resident workers. |
+
+`scripts/accel_ab.py` interleaves legacy/accel/resident renders in one process and exits
+non-zero unless tokens, latents, audio and encoded bytes are identical; run it on a new GPU
+type before trusting the timings.
+
+RTX 3090 Ti, 68.2 s clip (Electric Gold, seed 831002, 3000-token cap, 32 steps), warm, min / median
+of 3, GPU otherwise idle: upstream paths 39.20 / 39.57 s, defaults 29.26 / 29.38 s,
+`YUE_RESIDENT=1` 27.65 / 28.54 s. AR decode 106 -> 133 tok/s. With another tenant holding the
+GPU at 100%: 77.4 / 78.0 s -> 63.8 s. All 40 patched renders matched the unpatched FLAC byte for
+byte. Stage tables, placement costs and rejected ideas: `examples/accel-ab-20261110.json`.
 
 ## Deploy
 

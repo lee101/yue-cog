@@ -1,0 +1,389 @@
+{
+ "date": "2026-11-10",
+ "gpu": "RTX 3090 Ti 24 GiB (local, shared host)",
+ "torch": "2.10.0",
+ "yue2": "bd90e4ccae671d869b3ecaca6d7e893927d29442",
+ "runtime": "yue2-bd90e4c-quality-v2",
+ "patch": "patches/yue2-accel.patch",
+ "env": {
+  "YUE_MEMORY_BUDGET_GIB": "18",
+  "YUE_OFFLOAD_AR": "1",
+  "YUE_BACKEND": "torch",
+  "YUE_QUANT": "none"
+ },
+ "request": {
+  "source": "examples/gpu-benchmark-20260920.json results[0].request (Electric Gold)",
+  "seed": 831002,
+  "cot": "full",
+  "ode_steps": 32,
+  "semantic_max_tokens": 3000,
+  "format": "flac"
+ },
+ "output": {
+  "seconds": 68.199,
+  "abc_output_tokens": 723,
+  "semantic_output_tokens": 1706,
+  "flac_sha256": "62cd9fc30944bb1ee110c7b10db574f7e1be56b2595b8da7e455a711e8351705"
+ },
+ "exactness": {
+  "reference": "unpatched upstream package, separate process",
+  "patched_renders_compared": 40,
+  "identical_abc_tokens": true,
+  "identical_semantic_tokens": true,
+  "identical_latents": true,
+  "identical_audio": true,
+  "identical_flac_bytes": true,
+  "token_identity_extra": "3 prompts/seeds x (eager, fused, fused+lean); cfg_scale=1.5 and cot=off (2 branches, eager sampling, lean decode); cot=melody"
+ },
+ "variants": {
+  "legacy": "patched package, every switch off (upstream code path)",
+  "accel": "defaults: fast_placement, fused_sampling, lean_decode",
+  "accel+resident": "accel plus YUE_RESIDENT=1, steady state"
+ },
+ "stage_seconds_gpu_quiet": {
+  "note": "no other GPU tenant (utilisation <= 3% before each render); legacy/accel interleaved in one process, resident steady state later in the same process",
+  "legacy": {
+   "n": 3,
+   "wall": {
+    "min": 39.2,
+    "median": 39.57
+   },
+   "abc": {
+    "min": 7.04,
+    "median": 7.07
+   },
+   "semantic": {
+    "min": 16.01,
+    "median": 16.05
+   },
+   "nar": {
+    "min": 9.95,
+    "median": 10.32
+   },
+   "vae": {
+    "min": 3.67,
+    "median": 3.75
+   },
+   "other": {
+    "min": 2.38,
+    "median": 2.4
+   },
+   "abc_tps": {
+    "min": 96.89,
+    "median": 102.33
+   },
+   "semantic_tps": {
+    "min": 105.76,
+    "median": 106.28
+   },
+   "peak_allocated_mib": {
+    "min": 7712.8,
+    "median": 7743.8
+   },
+   "idle_process_vram_mib": {
+    "min": 1512,
+    "median": 1574
+   }
+  },
+  "accel": {
+   "n": 3,
+   "wall": {
+    "min": 29.26,
+    "median": 29.38
+   },
+   "abc": {
+    "min": 5.39,
+    "median": 5.53
+   },
+   "semantic": {
+    "min": 12.8,
+    "median": 12.85
+   },
+   "nar": {
+    "min": 8.17,
+    "median": 8.22
+   },
+   "vae": {
+    "min": 1.03,
+    "median": 1.03
+   },
+   "other": {
+    "min": 1.66,
+    "median": 1.82
+   },
+   "abc_tps": {
+    "min": 128.78,
+    "median": 130.83
+   },
+   "semantic_tps": {
+    "min": 132.02,
+    "median": 132.72
+   },
+   "peak_allocated_mib": {
+    "min": 7728.3,
+    "median": 7758.4
+   },
+   "idle_process_vram_mib": {
+    "min": 1494,
+    "median": 1534
+   }
+  },
+  "accel+resident": {
+   "n": 3,
+   "wall": {
+    "min": 27.65,
+    "median": 28.54
+   },
+   "abc": {
+    "min": 5.49,
+    "median": 6.22
+   },
+   "semantic": {
+    "min": 12.78,
+    "median": 12.82
+   },
+   "nar": {
+    "min": 8.22,
+    "median": 8.22
+   },
+   "vae": {
+    "min": 0.87,
+    "median": 0.92
+   },
+   "other": {
+    "min": 0.29,
+    "median": 0.33
+   },
+   "abc_tps": {
+    "min": 69.68,
+    "median": 116.21
+   },
+   "semantic_tps": {
+    "min": 131.66,
+    "median": 133.08
+   },
+   "peak_allocated_mib": {
+    "min": 9812.7,
+    "median": 9831.0
+   },
+   "idle_process_vram_mib": {
+    "min": 8528,
+    "median": 8586
+   }
+  }
+ },
+ "stage_seconds_gpu_shared": {
+  "note": "another process held the GPU at ~100% utilisation; pristine_upstream ran in its own process, the rest interleaved in one process",
+  "pristine_upstream": {
+   "n": 3,
+   "wall": {
+    "min": 77.35,
+    "median": 77.96
+   },
+   "abc": {
+    "min": 14.31,
+    "median": 14.45
+   },
+   "semantic": {
+    "min": 33.76,
+    "median": 33.96
+   },
+   "nar": {
+    "min": 21.37,
+    "median": 21.46
+   },
+   "vae": {
+    "min": 4.91,
+    "median": 5.24
+   },
+   "other": {
+    "min": 2.65,
+    "median": 3.0
+   },
+   "abc_tps": {
+    "min": 49.84,
+    "median": 50.02
+   },
+   "semantic_tps": {
+    "min": 49.74,
+    "median": 50.24
+   },
+   "peak_allocated_mib": {
+    "min": 7692.6,
+    "median": 7712.8
+   }
+  },
+  "legacy": {
+   "n": 4,
+   "wall": {
+    "min": 78.86,
+    "median": 81.81
+   },
+   "abc": {
+    "min": 14.66,
+    "median": 15.08
+   },
+   "semantic": {
+    "min": 33.98,
+    "median": 34.19
+   },
+   "nar": {
+    "min": 21.27,
+    "median": 22.08
+   },
+   "vae": {
+    "min": 5.47,
+    "median": 6.9
+   },
+   "other": {
+    "min": 3.12,
+    "median": 3.68
+   },
+   "abc_tps": {
+    "min": 46.74,
+    "median": 47.97
+   },
+   "semantic_tps": {
+    "min": 49.77,
+    "median": 49.89
+   },
+   "peak_allocated_mib": {
+    "min": 7420.0,
+    "median": 7580.8
+   },
+   "idle_process_vram_mib": {
+    "min": 1946,
+    "median": 1946
+   }
+  },
+  "accel_pinned_without_lean_decode": {
+   "n": 2,
+   "wall": {
+    "min": 63.45,
+    "median": 63.92
+   },
+   "abc": {
+    "min": 12.69,
+    "median": 12.8
+   },
+   "semantic": {
+    "min": 30.0,
+    "median": 30.43
+   },
+   "nar": {
+    "min": 17.93,
+    "median": 18.03
+   },
+   "vae": {
+    "min": 1.85,
+    "median": 1.86
+   },
+   "other": {
+    "min": 0.77,
+    "median": 0.81
+   },
+   "abc_tps": {
+    "min": 56.02,
+    "median": 56.5
+   },
+   "semantic_tps": {
+    "min": 55.27,
+    "median": 56.07
+   },
+   "peak_allocated_mib": {
+    "min": 7758.0,
+    "median": 7791.4
+   }
+  },
+  "accel": {
+   "n": 1,
+   "wall": {
+    "min": 63.84,
+    "median": 63.84
+   },
+   "abc": {
+    "min": 12.35,
+    "median": 12.35
+   },
+   "semantic": {
+    "min": 28.91,
+    "median": 28.91
+   },
+   "nar": {
+    "min": 17.65,
+    "median": 17.65
+   },
+   "vae": {
+    "min": 2.17,
+    "median": 2.17
+   },
+   "other": {
+    "min": 2.76,
+    "median": 2.76
+   },
+   "abc_tps": {
+    "min": 58.56,
+    "median": 58.56
+   },
+   "semantic_tps": {
+    "min": 59.0,
+    "median": 59.0
+   },
+   "peak_allocated_mib": {
+    "min": 7693.1,
+    "median": 7693.1
+   },
+   "idle_process_vram_mib": {
+    "min": 2450,
+    "median": 2450
+   }
+  }
+ },
+ "placement_seconds": {
+  "upstream_to_cpu": [
+   2.2,
+   3.5
+  ],
+  "upstream_to_gpu": [
+   2.0,
+   2.9
+  ],
+  "master_to_cpu": 0.005,
+  "master_to_gpu": [
+   1.75,
+   2.1
+  ],
+  "pinned_to_gpu": [
+   0.47,
+   0.49
+  ],
+  "pin_once_per_process": 8.2,
+  "pinned_host_gib": 9
+ },
+ "cold_start": {
+  "note": "fresh process, page cache hot, GPU shared, 300-token request; wall minus stage time",
+  "first_request_overhead_s": [
+   10.7,
+   17.3
+  ],
+  "warm_request_overhead_s": [
+   2.2,
+   2.3
+  ]
+ },
+ "rejected": {
+  "lm_head_allowed_slice": "bf16 GEMM over a row slice is not bitwise equal to the full head",
+  "vae_cudnn_benchmark": {
+   "decode_s": 1.03,
+   "baseline_decode_s": 1.5,
+   "snr_db": 115.3,
+   "why": "not bitwise; autotunes for every new last-tile length"
+  },
+  "vae_core_2048": {
+   "snr_db": 112.0,
+   "why": "no gain, +1.4 GiB peak"
+  },
+  "vae_fold_weight_norm": "bitwise identical, no gain",
+  "pin_by_default": "8 s per process and about 9 GiB locked host RAM against 1.4 s per warm request"
+ }
+}
